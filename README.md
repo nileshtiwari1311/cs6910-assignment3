@@ -38,3 +38,10 @@ The Seq2Seq models take longer time to train, so hyperparameter search was also 
 ├── script.py
 ├── script_attn.py
 ```
+- The files named ```Q<x>_<y>.ipynb``` have codes specific for the subproblems given in the [Assignment](https://wandb.ai/cs6910_2023/A3/reports/Assignment-3--Vmlldzo0MDU2MzQx). The files named ```Q<x>.ipynb``` have codes for the 
+rest of the problem.
+- The file named ```script.py``` is a ```python``` script that takes the hyperparameters as command line arguments, and trains the dataset for the given hyperparameter configuration on **vanilla** Seq2Seq model to obtain test accuracy on the test data.
+- The file named ```script_attn.py``` has the same functionality as ```script.py``` with **Attention Network**.
+To run the ```Python``` script files, use the following command:
+  python script.py [--command-line arguments]
+The following are the 
