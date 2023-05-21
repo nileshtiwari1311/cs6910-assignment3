@@ -1,5 +1,5 @@
 # Model Seq2Seq learning problems using Recurrent Neural Networks and Attention Networks
-    Course Assignment of CS6910 Deep Learning IIT Madras
+    Course Assignment of CS6910 Deep Learning at IIT Madras
 ## Abstract<br/>
 The Seq2Seq problem is built with ```Pytorch``` library, using Recurrent Neural Networks with different cells such 
 as vanilla **RNN**, **LSTM** and **GRU**. The **Attention Network** is also built and compared with the vanilla model.
