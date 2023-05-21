@@ -1,5 +1,5 @@
-import numpy as np # linear algebra
-import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+import numpy as np 
+import pandas as pd
 import random
 import wandb
 
@@ -19,7 +19,7 @@ from copy import deepcopy
 
 #--------------------------------------------------------
 
-# %% [code] {"execution":{"iopub.status.busy":"2023-05-19T18:37:22.048613Z","iopub.execute_input":"2023-05-19T18:37:22.049245Z","iopub.status.idle":"2023-05-19T18:37:22.123938Z","shell.execute_reply.started":"2023-05-19T18:37:22.049209Z","shell.execute_reply":"2023-05-19T18:37:22.122782Z"}}
+# Global constant variables used throughout the program
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Device = ", device)
 
@@ -34,19 +34,21 @@ PAD_idx = 2
 UNK_idx = 3
 
 batch_size = 32
+# languages in antarakshar_dataset
 languages = ["asm", "ben", "brx", "guj", "hin", "kan", "kas", "kok", "mai", "mal", "mar", "mni", "ori", "pan", "san", "sid", "tam", "tel", "urd"]
+# paths to save best model and predictions
 best_model_path = '/script_model/best_model_script.pth'
 test_pred_path = '/script_predictions/pred_script.csv'
 #-------------------------------------------------------
 
-# %% [code] {"execution":{"iopub.status.busy":"2023-05-19T18:37:22.129800Z","iopub.execute_input":"2023-05-19T18:37:22.130804Z","iopub.status.idle":"2023-05-19T18:37:22.136376Z","shell.execute_reply.started":"2023-05-19T18:37:22.130762Z","shell.execute_reply":"2023-05-19T18:37:22.135362Z"}}
+# times the execution of training
 def timeInMinutes(s):
     m = math.floor(s / 60)
     s -= m * 60
     s = format(s, ".0f")
     return str(m) + "m " + str(s) + "s"
 
-# %% [code] {"execution":{"iopub.status.busy":"2023-05-19T18:37:22.137865Z","iopub.execute_input":"2023-05-19T18:37:22.138374Z","iopub.status.idle":"2023-05-19T18:37:22.149777Z","shell.execute_reply.started":"2023-05-19T18:37:22.138340Z","shell.execute_reply":"2023-05-19T18:37:22.148807Z"}}
+# class to prepare and store vocabulary
 class Script:
     def __init__(self, name):
         self.name = name
@@ -55,10 +57,11 @@ class Script:
         self.index2char = {SOS_idx: SOS_token, EOS_idx: EOS_token, PAD_idx: PAD_token, UNK_idx: UNK_token}
         self.n_chars = 4  # Count SOS, EOS, PAD and UNK
 
+    # function that adds characters in the word to the vocabulary
     def addWord(self, word):
         for char in word:
             self.addChar(char)
-
+    # function that adds characters to the vocabulary
     def addChar(self, char):
         if char not in self.char2index:
             self.char2index[char] = self.n_chars
@@ -68,7 +71,7 @@ class Script:
         else:
             self.char2count[char] += 1
 
-# %% [code] {"execution":{"iopub.status.busy":"2023-05-19T18:37:22.152405Z","iopub.execute_input":"2023-05-19T18:37:22.153051Z","iopub.status.idle":"2023-05-19T18:37:22.164810Z","shell.execute_reply.started":"2023-05-19T18:37:22.153026Z","shell.execute_reply":"2023-05-19T18:37:22.163825Z"}}
+# prepare vocabulary from given data having source and target words
 def prepareVocab(data, in_scr="lat", out_scr="dev"):
     input_vocab = Script(in_scr)
     output_vocab = Script(out_scr)
@@ -79,7 +82,8 @@ def prepareVocab(data, in_scr="lat", out_scr="dev"):
     
     return input_vocab, output_vocab
 
-# %% [code] {"execution":{"iopub.status.busy":"2023-05-19T18:37:22.167281Z","iopub.execute_input":"2023-05-19T18:37:22.169378Z","iopub.status.idle":"2023-05-19T18:37:22.176942Z","shell.execute_reply.started":"2023-05-19T18:37:22.169349Z","shell.execute_reply":"2023-05-19T18:37:22.175928Z"}}
+# returns tensor from word after mapping each character in the word to an index according to the vocabulary
+# appends sos or eos accordingly if required
 def tensorFromWord(word, vocab, sos=False, eos=False):
     char_list = []
     if sos:
@@ -94,7 +98,7 @@ def tensorFromWord(word, vocab, sos=False, eos=False):
     char_tensor = torch.tensor(char_list, dtype=torch.long)
     return char_tensor
 
-# %% [code] {"execution":{"iopub.status.busy":"2023-05-19T18:37:22.180150Z","iopub.execute_input":"2023-05-19T18:37:22.180467Z","iopub.status.idle":"2023-05-19T18:37:22.188586Z","shell.execute_reply.started":"2023-05-19T18:37:22.180433Z","shell.execute_reply":"2023-05-19T18:37:22.187677Z"}}
+# function that takes a list of tensors of word representations and pads them
 def processData(data, vocab, sos=False, eos=False):
     tensor_list = []
     for word in data:
@@ -103,7 +107,7 @@ def processData(data, vocab, sos=False, eos=False):
     word_tensor_pad = pad_sequence(tensor_list, padding_value=PAD_idx, batch_first=True)
     return word_tensor_pad
 
-# %% [code] {"execution":{"iopub.status.busy":"2023-05-19T18:37:22.191101Z","iopub.execute_input":"2023-05-19T18:37:22.191997Z","iopub.status.idle":"2023-05-19T18:37:22.199336Z","shell.execute_reply.started":"2023-05-19T18:37:22.191963Z","shell.execute_reply":"2023-05-19T18:37:22.198581Z"}}
+# returns word from tensor by mapping index to character in vocabulary
 def wordFromTensor(word_tensor, vocab):
     word = ""
     for idx in word_tensor:
@@ -113,7 +117,7 @@ def wordFromTensor(word_tensor, vocab):
             word += vocab.index2char[idx.item()]
     return word
 
-# %% [code] {"execution":{"iopub.status.busy":"2023-05-19T18:37:22.201016Z","iopub.execute_input":"2023-05-19T18:37:22.201458Z","iopub.status.idle":"2023-05-19T18:37:22.216175Z","shell.execute_reply.started":"2023-05-19T18:37:22.201411Z","shell.execute_reply":"2023-05-19T18:37:22.215353Z"}}
+# class Encoder that receives source sequence, similar to vanilla model
 class Encoder(nn.Module):
     def __init__(self, cell_type, input_size, embedding_size, hidden_size, num_layers, dp, bidir=False):
         super(Encoder, self).__init__()
@@ -136,10 +140,8 @@ class Encoder(nn.Module):
             self.cell = nn.LSTM(self.embedding_size, self.hidden_size, self.num_layers, dropout=dp, bidirectional=self.bidir)
 
     def forward(self, x):
-        # x shape: (seq_length, N) where N is batch size
 
         embedding = self.dropout(self.embedding(x))
-        # embedding shape: (seq_length, N, embedding_size)
         
         cell = None
         if self.cell_type == "LSTM":
@@ -160,15 +162,16 @@ class Encoder(nn.Module):
             hidden = hidden.view(self.num_layers, 2, b_sz, -1)
             hidden = hidden[-1]
             hidden = hidden.mean(axis=0)
+            # output is of shape: (seq_len, b_sz, 2*hidden_sz)
+            # so covert it to (seq_len, b_sz, hidden_sz)
             outputs = outputs[:, :, :self.hidden_size] + outputs[:, : ,self.hidden_size:]
         else:
             hidden = hidden[-1,:,:]
         hidden = hidden.unsqueeze(0)
-        # outputs shape: (seq_length, N, hidden_size)
-
+        # return outputs also, this will be used in calculating attention weights
         return outputs, hidden, cell
 
-# %% [code] {"execution":{"iopub.status.busy":"2023-05-19T18:37:22.217786Z","iopub.execute_input":"2023-05-19T18:37:22.218439Z","iopub.status.idle":"2023-05-19T18:37:22.234442Z","shell.execute_reply.started":"2023-05-19T18:37:22.218407Z","shell.execute_reply":"2023-05-19T18:37:22.233357Z"}}
+# class decoder with attention network that taken hidden output form encoder and target sequence to produce predicted sequence
 class AttnDecoder(nn.Module):
     def __init__(
         self, cell_type, input_size, embedding_size, hidden_size, output_size, num_layers, dp
@@ -180,27 +183,27 @@ class AttnDecoder(nn.Module):
         self.hidden_size = hidden_size
         self.output_size = output_size
         self.num_layers = num_layers
+        # attention's fully connected layer
         self.attn_fc = nn.Linear(hidden_size, hidden_size, bias=False)
         self.dropout = nn.Dropout(dp)
 
         self.embedding = nn.Embedding(self.input_size, self.embedding_size)
         if self.num_layers == 1:
             dp = 0.0
+        # now the concatenated output of input_embedding and contect vector is input of the decoder cell
         if self.cell_type == "RNN":
             self.cell = nn.RNN(self.embedding_size + self.hidden_size, self.hidden_size, self.num_layers, dropout=dp)
         elif self.cell_type == "GRU":
             self.cell = nn.GRU(self.embedding_size + self.hidden_size, self.hidden_size, self.num_layers, dropout=dp)
         elif self.cell_type == "LSTM":
             self.cell = nn.LSTM(self.embedding_size + self.hidden_size, self.hidden_size, self.num_layers, dropout=dp)
+        # last fully connected layer that will produce output of size (1, b_sz, tgt_vocab_sz)
         self.fc = nn.Linear(self.hidden_size * 2, self.output_size)
 
     def forward(self, x, enc_out, hidden, cell):
-        # x shape: (N) where N is for batch size, we want it to be (1, N), seq_length
-        # is 1 here because we are sending in a single word and not a sentence
         x = x.unsqueeze(0)
 
         embedding = self.dropout(self.embedding(x))
-        # embedding shape: (1, N, embedding_size)
         
         #---------------------------------------
         #Attention - Generate attn_w,context from enc_out,hidden
@@ -213,23 +216,22 @@ class AttnDecoder(nn.Module):
         context = context.permute(1, 0, 2) # (1, b_sz, h_sz)
         #----------------------------------------
         
+        # send context vector concatenated with input embeding to the decoder cell
         if self.cell_type == "LSTM":
             outputs, (hidden, cell) = self.cell(torch.cat([embedding, context], dim=2), (hidden, cell))
         else:
             outputs, hidden = self.cell(torch.cat([embedding, context], dim=2), hidden)
-        # outputs shape: (1, N, hidden_size)
 
+        # last fully connected layer also takes concatenated output of decoder cell outputs and context vector
         predictions = self.fc(torch.cat([outputs, context], dim=2))
 
-        # predictions shape: (1, N, length_target_vocabulary) to send it to
-        # loss function we want it to be (N, length_target_vocabulary) so we're
-        # just gonna remove the first dim
+        
         predictions = predictions.squeeze(0)
         attn_w = attn_w.squeeze(0)
 
         return predictions, hidden, cell, attn_w
 
-# %% [code] {"execution":{"iopub.status.busy":"2023-05-19T18:37:22.236012Z","iopub.execute_input":"2023-05-19T18:37:22.237181Z","iopub.status.idle":"2023-05-19T18:37:22.252982Z","shell.execute_reply.started":"2023-05-19T18:37:22.237096Z","shell.execute_reply":"2023-05-19T18:37:22.251924Z"}}
+# similar to vanilla model but also return attention matrix as output
 class Seq2Seq(nn.Module):
     def __init__(self, encoder, decoder):
         super(Seq2Seq, self).__init__()
@@ -251,36 +253,30 @@ class Seq2Seq(nn.Module):
             
         attn_matrix = torch.zeros(target_len, batch_sz, source_len).to(device) # (target_len, b_sz, source_len)
 
-        # Grab the first input to the Decoder which will be <SOS> token
+        
         x = target[0]
 
         for t in range(1, target_len):
-            # Use previous hidden, cell as context from encoder at start
+            
             output, hidden, cell, attn_w = self.decoder(x, enc_out, hidden, cell)
 
-            # Store next output prediction
+            # Store next output prediction and attention matrix
             outputs[t] = output
             attn_matrix[t] = attn_w
 
-            # Get the best word the Decoder predicted (index in the vocabulary)
             best_guess = output.argmax(dim=1)
 
-            # With probability of teacher_force_ratio we take the actual next word
-            # otherwise we take the word that the Decoder predicted it to be.
-            # Teacher Forcing is used so that the model gets used to seeing
-            # similar inputs at training and testing time, if teacher forcing is 1
-            # then inputs at test time might be completely different than what the
-            # network is used to. This was a long comment.
+            
             x = target[t] if random.random() < teacher_force_ratio else best_guess
 
         return outputs, attn_matrix
 
-# %% [code] {"execution":{"iopub.status.busy":"2023-05-19T18:37:22.259016Z","iopub.execute_input":"2023-05-19T18:37:22.259311Z","iopub.status.idle":"2023-05-19T18:37:22.267943Z","shell.execute_reply.started":"2023-05-19T18:37:22.259269Z","shell.execute_reply":"2023-05-19T18:37:22.266930Z"}}
+# runs the model in eval mode and returns accuracy and loss
 def sum_accuracy(preds, target):
     num_equal_columns = torch.logical_or(preds == target, target == PAD_idx).all(dim=0).sum().item()
     return num_equal_columns
 
-# %% [code] {"execution":{"iopub.status.busy":"2023-05-19T18:37:22.269424Z","iopub.execute_input":"2023-05-19T18:37:22.269982Z","iopub.status.idle":"2023-05-19T18:37:22.280988Z","shell.execute_reply.started":"2023-05-19T18:37:22.269948Z","shell.execute_reply":"2023-05-19T18:37:22.279685Z"}}
+# runs the model in eval mode and returns accuracy and loss, similar to vanilla model
 def evaluateModel(model, dataloader, criterion, b_sz=32):
     model.eval()
     
@@ -290,22 +286,16 @@ def evaluateModel(model, dataloader, criterion, b_sz=32):
     
     with torch.no_grad():
         for batch_idx, (input_seq, target_seq) in enumerate(dataloader):
-            # Get input and targets and get to cuda
+            
             input_seq = input_seq.T.to(device)
             target_seq = target_seq.T.to(device)
 
-            # Forward prop
+            # Forward prop attention matrix also as output of decoder
             output, attn_matrix = model(input_seq, target_seq, teacher_force_ratio=0.0)
             
             pred_seq = output.argmax(dim=2)
             n_correct += sum_accuracy(pred_seq, target_seq)
 
-            # Output is of shape (trg_len, batch_size, output_dim) but Cross Entropy Loss
-            # doesn't take input in that form. For example if we have MNIST we want to have
-            # output to be: (N, 10) and targets just (N). Here we can view it in a similar
-            # way that we have output_words * batch_size that we want to send in into
-            # our cost function, so we need to do some reshapin. While we're at it
-            # Let's also remove the start token while we're at it
             output = output[1:].reshape(-1, output.shape[2])
             target = target_seq[1:].reshape(-1)
             
@@ -317,7 +307,8 @@ def evaluateModel(model, dataloader, criterion, b_sz=32):
         acc = acc * 100.0
         loss_epoch /= len(dataloader)
         return loss_epoch, acc
-    
+
+# same as evaluate but also saves the predictions into csv, similar to vanilla model
 def saveAndEvaluate(model, dataloader, criterion, df, vocab, b_sz=32):
     results = []
     model.eval()
@@ -328,22 +319,16 @@ def saveAndEvaluate(model, dataloader, criterion, df, vocab, b_sz=32):
     
     with torch.no_grad():
         for batch_idx, (input_seq, target_seq) in enumerate(dataloader):
-            # Get input and targets and get to cuda
+            
             input_seq = input_seq.T.to(device)
             target_seq = target_seq.T.to(device)
 
-            # Forward prop
+            # Forward prop, attention matrix also as output of decoder
             output, attn_matrix = model(input_seq, target_seq, teacher_force_ratio=0.0)
             
             pred_seq = output.argmax(dim=2)
             n_correct += sum_accuracy(pred_seq, target_seq)
 
-            # Output is of shape (trg_len, batch_size, output_dim) but Cross Entropy Loss
-            # doesn't take input in that form. For example if we have MNIST we want to have
-            # output to be: (N, 10) and targets just (N). Here we can view it in a similar
-            # way that we have output_words * batch_size that we want to send in into
-            # our cost function, so we need to do some reshapin. While we're at it
-            # Let's also remove the start token while we're at it
             output = output[1:].reshape(-1, output.shape[2])
             target = target_seq[1:].reshape(-1)
             
@@ -367,7 +352,7 @@ def saveAndEvaluate(model, dataloader, criterion, df, vocab, b_sz=32):
         
         return loss_epoch, acc
 
-# %% [code] {"execution":{"iopub.status.busy":"2023-05-19T18:37:22.282590Z","iopub.execute_input":"2023-05-19T18:37:22.283088Z","iopub.status.idle":"2023-05-19T18:37:22.299246Z","shell.execute_reply.started":"2023-05-19T18:37:22.283055Z","shell.execute_reply":"2023-05-19T18:37:22.298455Z"}}
+# function that trains the model, same as vanilla model
 def trainModel(model, criterion, optimizer, train_dataloader, valid_dataloader, num_epochs, batch_size=32):
     start = time.time()
     min_val_loss = 10000.0
@@ -385,18 +370,13 @@ def trainModel(model, criterion, optimizer, train_dataloader, valid_dataloader, 
         model.train()
 
         for batch_idx, (input_seq, target_seq) in enumerate(train_dataloader):
-            # Get input and targets and get to cuda
+            
             input_seq = input_seq.T.to(device)
             target_seq = target_seq.T.to(device)
 
-            # Forward prop
+            # Forward prop, attention matrix also as output of decoder
             output, attn_matrix = model(input_seq, target_seq)
-            # Output is of shape (trg_len, batch_size, output_dim) but Cross Entropy Loss
-            # doesn't take input in that form. For example if we have MNIST we want to have
-            # output to be: (N, 10) and targets just (N). Here we can view it in a similar
-            # way that we have output_words * batch_size that we want to send in into
-            # our cost function, so we need to do some reshapin. While we're at it
-            # Let's also remove the start token while we're at it
+            
             output = output[1:].reshape(-1, output.shape[2])
             target = target_seq[1:].reshape(-1)
 
@@ -406,8 +386,7 @@ def trainModel(model, criterion, optimizer, train_dataloader, valid_dataloader, 
             # Back prop
             loss.backward()
 
-            # Clip to avoid exploding gradient issues, makes sure grads are
-            # within a healthy range
+            
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1)
 
             # Gradient descent step
@@ -483,15 +462,15 @@ if __name__=="__main__":
     test_data = pd.read_csv(test_data_path, sep=',', header=None).values
     valid_data = pd.read_csv(valid_data_path, sep=',', header=None).values
 
-    # %% [code] {"execution":{"iopub.status.busy":"2023-05-19T18:37:22.411838Z","iopub.execute_input":"2023-05-19T18:37:22.412265Z","iopub.status.idle":"2023-05-19T18:37:22.836434Z","shell.execute_reply.started":"2023-05-19T18:37:22.412231Z","shell.execute_reply":"2023-05-19T18:37:22.835364Z"}}
+    
     # build vocabulary
     x_vocab, y_vocab = prepareVocab(train_data)
 
-    # %% [code] {"execution":{"iopub.status.busy":"2023-05-19T18:37:22.837661Z","iopub.execute_input":"2023-05-19T18:37:22.838036Z","iopub.status.idle":"2023-05-19T18:37:22.845664Z","shell.execute_reply.started":"2023-05-19T18:37:22.838002Z","shell.execute_reply":"2023-05-19T18:37:22.844556Z"}}
+    
     print('Number of characters in Source Vocab :', x_vocab.n_chars-4)
     print('Number of characters in Target Vocab :', y_vocab.n_chars-4)
 
-    # %% [code] {"execution":{"iopub.status.busy":"2023-05-19T18:37:22.847309Z","iopub.execute_input":"2023-05-19T18:37:22.848075Z","iopub.status.idle":"2023-05-19T18:37:26.760963Z","shell.execute_reply.started":"2023-05-19T18:37:22.847998Z","shell.execute_reply":"2023-05-19T18:37:26.759828Z"}}
+    
     x_train = processData(train_data[:,0], x_vocab, eos=True).to(device=device)
     x_test = processData(test_data[:,0], x_vocab, eos=True).to(device=device)
     x_valid = processData(valid_data[:,0], x_vocab, eos=True).to(device=device)
@@ -500,7 +479,7 @@ if __name__=="__main__":
     y_test = processData(test_data[:,1], y_vocab, sos=True, eos=True).to(device=device)
     y_valid = processData(valid_data[:,1], y_vocab, sos=True, eos=True).to(device=device)
 
-    # %% [code] {"execution":{"iopub.status.busy":"2023-05-19T18:37:26.763406Z","iopub.execute_input":"2023-05-19T18:37:26.763741Z","iopub.status.idle":"2023-05-19T18:37:26.771823Z","shell.execute_reply.started":"2023-05-19T18:37:26.763712Z","shell.execute_reply":"2023-05-19T18:37:26.770605Z"}}
+    
     n_train = x_train.size(0)
     n_valid = x_valid.size(0)
     n_test = x_test.size(0)
@@ -508,7 +487,7 @@ if __name__=="__main__":
     print('Number of Validation Sequences :', n_valid)
     print('Number of Test Sequences :', n_test)
 
-    # %% [code] {"execution":{"iopub.status.busy":"2023-05-19T18:37:26.773629Z","iopub.execute_input":"2023-05-19T18:37:26.774382Z","iopub.status.idle":"2023-05-19T18:37:26.784623Z","shell.execute_reply.started":"2023-05-19T18:37:26.774342Z","shell.execute_reply":"2023-05-19T18:37:26.783673Z"}}
+    
     print("Building the model...")
     train_dataset = TensorDataset(x_train, y_train)
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
