@@ -45,4 +45,8 @@ rest of the problem.
 - To run the ```Python``` script files, use the following command:<br/>
     ``python script.py [arguments]``<br/>
 - The following are the arguments supported by the script files:<br/>
-    - wandb-project
+    - ``wandb-project``: wandb project name to store the runs [default: dl_ass_3_script]
+    - ``wandb-entity``: username of the wandb [default: cs22m059]
+    - ``dataset``: dataset among many languages and scripts in the ***Aksharantar dataset*** [default: hin]
+    - ``cell_type``: one of [RNN, LSTM, GRU] [default: LSTM]
+    - 
