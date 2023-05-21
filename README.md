@@ -67,3 +67,4 @@ rest of the problem.
 The best test accuracy on the dataset achieved is **35.18%** with **vanilla network** and **40.99%** with **attention network**. The explanation and results of subproblems can be accessed [here](link to the self assignment).
 
 Note :- The functions and network has been explained in the script files as comments. The Notebooks do not have the redundant comments.
+Reference :- [aladdinpersson/Machine-Learning-Collection](https://github.com/aladdinpersson/Machine-Learning-Collection/blob/master/ML/Pytorch/more_advanced/Seq2Seq/seq2seq.py)
