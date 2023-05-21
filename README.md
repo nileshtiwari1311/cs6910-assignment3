@@ -36,7 +36,7 @@ The Seq2Seq models take longer time to train, so hyperparameter search was also 
 ├── Q5_a.ipynb
 ├── Q5_c.ipynb
 ├── script.py
-├── script_attn.py
+└── script_attn.py
 ```
 - The files named ```Q<x>_<y>.ipynb``` have codes specific for the subproblems given in the [Assignment](https://wandb.ai/cs6910_2023/A3/reports/Assignment-3--Vmlldzo0MDU2MzQx). The files named ```Q<x>.ipynb``` have codes for the 
 rest of the problem.
