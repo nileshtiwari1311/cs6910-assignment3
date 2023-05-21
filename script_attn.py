@@ -35,7 +35,7 @@ UNK_idx = 3
 
 batch_size = 32
 languages = ["asm", "ben", "brx", "guj", "hin", "kan", "kas", "kok", "mai", "mal", "mar", "mni", "ori", "pan", "san", "sid", "tam", "tel", "urd"]
-best_model_path = '/script_model/best_model.pth'
+best_model_path = '/script_model/best_model_script.pth'
 test_pred_path = '/script_predictions/pred_script.csv'
 #-------------------------------------------------------
 
