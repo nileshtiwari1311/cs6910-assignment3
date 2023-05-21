@@ -59,4 +59,4 @@ rest of the problem.
 <!-- end of the list -->
 
 ## Results<br/>
-The best test accuracy on the dataset achieved is **36.50%** with **vanilla network** and **40.99%** with **attention network**. The explanation and results of subproblems can be accessed [here](link to the self assignment).
+The best test accuracy on the dataset achieved is **35.18%** with **vanilla network** and **40.99%** with **attention network**. The explanation and results of subproblems can be accessed [here](link to the self assignment).
