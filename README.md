@@ -27,6 +27,7 @@ The Seq2Seq models take longer time to train, so hyperparameter search was also 
 │   ├── pred_script.csv
 ├── script_model
 │   ├── best_model_script.pth
+├── attn_hmap.png
 ├── best_model_vanilla.pth
 ├── best_model_attn.pth
 ├── Q2.ipynb
@@ -35,6 +36,8 @@ The Seq2Seq models take longer time to train, so hyperparameter search was also 
 ├── Q5.ipynb
 ├── Q5_a.ipynb
 ├── Q5_c.ipynb
+├── sample_attn.png
+├── sample_vanilla.png
 ├── script.py
 └── script_attn.py
 ```
@@ -55,6 +58,10 @@ rest of the problem.
     - ``dec_num_layers``: number of layers in decoder [default: 3]
     - ``dropout``: dropout value used in the network [default: 0.2]
     - ``bidirectional``: encoder cell's bidirectionality, one of [Yes, No] [default: Yes]
+- The files ``best_model_vanilla.pth`` and ``best_model_attn.pth``are the saved model state dictionary for the best models obtained.
+- ``predictions_vanilla`` and ``predictions_attention`` contain the output predictions of the best models obtained.
+- ``script_model`` and ``script_predictions`` contain the best model obtained and predictions when the script is run with a hyperparameter configuration. (Best model on that hyperparameter configuration, using **Early stopping**).
+- The png files are the outputs of Attention Heatmap and Predictions for 10 sample inputs for both networks.
 
 <!-- end of the list -->
 
