@@ -49,4 +49,14 @@ rest of the problem.
     - ``wandb-entity``: username of the wandb [default: cs22m059]
     - ``dataset``: dataset among many languages and scripts in the ***Aksharantar dataset*** [default: hin]
     - ``cell_type``: one of [RNN, LSTM, GRU] [default: LSTM]
-    - 
+    - ``embedding_size``: embedding size of the input [default: 128]
+    - ``hidden_size``: hidden size of the cell [default: 256]
+    - ``enc_num_layers``: number of layers in encoder [default: 3]
+    - ``dec_num_layers``: number of layers in decoder [default: 3]
+    - ``dropout``: dropout value used in the network [default: 0.2]
+    - ``bidirectional``: encoder cell's bidirectionality, one of [Yes, No] [default: Yes]
+
+<!-- end of the list -->
+
+## Results<br/>
+The best test accuracy on the dataset achieved is **36.50%** with **vanilla network** and **40.99%** with **attention network**. The explanation and results of subproblems can be accessed [here](link to the self assignment).
