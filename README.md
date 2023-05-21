@@ -32,10 +32,8 @@ The Seq2Seq models take longer time to train, so hyperparameter search was also 
 ├── best_model_attn.pth
 ├── Q2.ipynb
 ├── Q4.ipynb
-├── Q4_c.ipynb
 ├── Q5.ipynb
 ├── Q5_a.ipynb
-├── Q5_c.ipynb
 ├── sample_attn.png
 ├── sample_vanilla.png
 ├── script.py
