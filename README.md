@@ -12,7 +12,7 @@ The training dataset has ***51,200*** examples whereas validation and test data 
 ## Objective<br/>
 The goal is to ***transliterate*** a word ***(sequence of characters)*** given in the ***Latin*** script
 to a word (sequence of characters) in the ***Devanagari*** script and compare the results obtained on using vanilla model and the model with attention networks.
-The Seq2Seq models take longer time to train, so hyperparameter search was also efficiently performed on ```wandb```.
+The Seq2Seq models take longer time to train, so hyperparameter search was efficiently performed on ```wandb```.
 ## Folder Structure<br/>
 ```
 ├── aksharantar_sampled
