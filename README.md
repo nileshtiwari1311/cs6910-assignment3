@@ -59,12 +59,12 @@ rest of the problem.
 - The files ``best_model_vanilla.pth`` and ``best_model_attn.pth``are the saved model state dictionary for the best models obtained.
 - ``predictions_vanilla`` and ``predictions_attention`` contain the output predictions of the best models obtained.
 - ``script_model`` and ``script_predictions`` contain the best model obtained and predictions when the script is run with a hyperparameter configuration. (Best model on that hyperparameter configuration, using **Early stopping**).
-- The png files are the outputs of Attention Heatmap and Predictions for 10 sample inputs for both networks.
+- The ``png`` files are the outputs of Attention Heatmap and Predictions for 10 sample inputs for both networks.
 
 <!-- end of the list -->
 
 ## Results<br/>
 The best test accuracy on the dataset achieved is **35.18%** with **vanilla network** and **40.99%** with **attention network**. The explanation and results of subproblems can be accessed [here](https://wandb.ai/cs22m059/dl_assgn_3_report/reports/CS6910-Assignment-3--Vmlldzo0NDI2OTA3).
 
-Note :- The functions and network has been explained in the script files as comments. The Notebooks do not have the redundant comments.
+Note :- The functions and network has been explained in the script files as comments. The Notebooks do not have the redundant comments.<br/>
 Reference :- [aladdinpersson/Machine-Learning-Collection](https://github.com/aladdinpersson/Machine-Learning-Collection/blob/master/ML/Pytorch/more_advanced/Seq2Seq/seq2seq.py)
