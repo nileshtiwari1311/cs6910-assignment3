@@ -52,7 +52,7 @@ rest of the problem.
     - ``dataset``: dataset among many languages and scripts in the ***Aksharantar dataset*** [default: hin]
     - ``cell_type``: one of [RNN, LSTM, GRU] [default: LSTM]
     - ``embedding_size``: embedding size of the input [default: 128]
-    - ``hidden_size``: hidden size of the cell [default: 256]
+    - ``hidden_size``: hidden layer size of the cell [default: 256]
     - ``enc_num_layers``: number of layers in encoder [default: 3]
     - ``dec_num_layers``: number of layers in decoder [default: 3]
     - ``dropout``: dropout value used in the network [default: 0.2]
