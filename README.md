@@ -23,17 +23,18 @@ The Seq2Seq models take longer time to train, so hyperparameter search was effic
 │   ├── pred_attn.csv
 ├── predictions_vanilla
 │   ├── pred_vanilla.csv
-├── script_predictions
-│   ├── pred_script.csv
 ├── script_model
 │   ├── best_model_script.pth
-├── attn_hmap.png
-├── best_model_vanilla.pth
-├── best_model_attn.pth
+├── script_predictions
+│   ├── pred_script.csv
 ├── Q2.ipynb
 ├── Q4.ipynb
 ├── Q5.ipynb
 ├── Q5_a.ipynb
+├── README.md
+├── attn_hmap.png
+├── best_model_attn.pth
+├── best_model_vanilla.pth
 ├── sample_attn.png
 ├── sample_vanilla.png
 ├── script.py
